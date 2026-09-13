@@ -6,13 +6,18 @@
 
 import pandas as pd
 import joblib, json
+import os
+
+# Resolve paths relative to this file, not the caller's working directory —
+# this module gets imported by api.py, which may run from a different folder.
+_HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Load models once when this module is imported
-m_survival = joblib.load('model_survival.pkl')
-m_relapse  = joblib.load('model_relapse.pkl')
-m_gvhd     = joblib.load('model_gvhd.pkl')
-encoders   = joblib.load('encoders.pkl')
-with open('feature_cols.json') as f:
+m_survival = joblib.load(os.path.join(_HERE, 'model_survival.pkl'))
+m_relapse  = joblib.load(os.path.join(_HERE, 'model_relapse.pkl'))
+m_gvhd     = joblib.load(os.path.join(_HERE, 'model_gvhd.pkl'))
+encoders   = joblib.load(os.path.join(_HERE, 'encoders.pkl'))
+with open(os.path.join(_HERE, 'feature_cols.json')) as f:
     feature_cols = json.load(f)
 
 from compatibility import compute_compatibility_score

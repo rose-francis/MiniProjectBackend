@@ -1,5 +1,6 @@
 # ============================================================
 # api.py
+# Shared FastAPI server for both donor-matching and disease-prediction.
 # Run with: uvicorn api:app --host 0.0.0.0 --port 8000 --reload
 # Test UI:  http://localhost:8000/docs
 # ============================================================
@@ -11,15 +12,25 @@ from typing import Optional
 import joblib, json
 import numpy as np
 import pandas as pd
-from compatibility import compute_compatibility_score
 from dotenv import load_dotenv
 import os
+import sys
 
 load_dotenv()
 
+# Feature folders — resolved from this file's own location so it works
+# no matter what directory the server is launched from.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DONOR_DIR = os.path.join(BASE_DIR, "donor-matching")
+DISEASE_DIR = os.path.join(BASE_DIR, "disease-prediction")
+
+# donor-matching's modules use flat (non-package) imports internally,
+# so they need their own folder on sys.path to resolve.
+sys.path.insert(0, DONOR_DIR)
+
+from compatibility import compute_compatibility_score
 from option_a import run_option_a
 import requests
-import builtins
 import pickle
 
 app = FastAPI(
@@ -34,12 +45,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load all 3 models
-m_survival = joblib.load('model_survival.pkl')
-m_relapse  = joblib.load('model_relapse.pkl')
-m_gvhd     = joblib.load('model_gvhd.pkl')
-encoders   = joblib.load('encoders.pkl')
-with open('feature_cols.json') as f:
+# Load all 3 donor-matching models
+m_survival = joblib.load(os.path.join(DONOR_DIR, 'model_survival.pkl'))
+m_relapse  = joblib.load(os.path.join(DONOR_DIR, 'model_relapse.pkl'))
+m_gvhd     = joblib.load(os.path.join(DONOR_DIR, 'model_gvhd.pkl'))
+encoders   = joblib.load(os.path.join(DONOR_DIR, 'encoders.pkl'))
+with open(os.path.join(DONOR_DIR, 'feature_cols.json')) as f:
     feature_cols = json.load(f)
 
 CATEGORICALS = [
@@ -48,10 +59,10 @@ CATEGORICALS = [
     'stem_cell_source', 'tx_post_relapse'
 ]
 
-#models for disease prediction
-DISEASE_MODEL_PATH = "model.pkl"
-DISEASE_ENCODER_PATH = "encoder.pkl"
-SYMPTOMS_PATH = "symptoms.pkl"
+# Models for disease prediction
+DISEASE_MODEL_PATH = os.path.join(DISEASE_DIR, "model.pkl")
+DISEASE_ENCODER_PATH = os.path.join(DISEASE_DIR, "encoder.pkl")
+SYMPTOMS_PATH = os.path.join(DISEASE_DIR, "symptoms.pkl")
 
 disease_model = pickle.load(open(DISEASE_MODEL_PATH, "rb"))
 disease_encoder = pickle.load(open(DISEASE_ENCODER_PATH, "rb"))
