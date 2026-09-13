@@ -1,5 +1,5 @@
 # ============================================================
-# pipeline.py
+# pipeline.py AKA Training Pipeline for Bone Marrow Transplant Donor Matching
 # Run this ONCE to train and save all 3 models
 # On first run: augments data and saves bone_marrow_augmented.csv
 # On subsequent runs: loads augmented CSV directly (faster)

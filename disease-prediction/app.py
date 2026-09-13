@@ -1,4 +1,4 @@
-# app.py
+# app.py AKA Training Pipeline for Disease Prediction
 # Trains (or loads, if already trained) the Random Forest disease-prediction model.
 # Run with: python app.py
 # Produces model.pkl / encoder.pkl / symptoms.pkl, loaded by donor-matching/api.py.
